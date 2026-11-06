@@ -1,0 +1,309 @@
+
+# SPORTS TOURNAMENT MANAGEMENT SYSTEM
+# Class 11 Computer Science
+# No user-defined functions
+
+teams = []
+matches = []
+
+print("=" * 50)
+print("      SPORTS TOURNAMENT MANAGEMENT SYSTEM")
+print("=" * 50)
+
+while True:
+
+    print("\n========== MAIN MENU ==========")
+    print("1. Register Team")
+    print("2. Record Match Result")
+    print("3. View League Table")
+    print("4. Search Team")
+    print("5. View Match History")
+    print("6. Exit")
+
+    choice = input("\nEnter choice: ")
+
+    # REGISTER TEAM
+
+    if choice == "1":
+
+        name = input("Enter team name: ").strip()
+
+        if name == "":
+            print("Team name cannot be empty.")
+            continue
+
+        exists = False
+
+        for team in teams:
+
+            if team["name"].lower() == name.lower():
+                exists = True
+                break
+
+        if exists:
+
+            print("Team already registered.")
+
+        else:
+
+            team = {
+                "name": name,
+                "played": 0,
+                "won": 0,
+                "drawn": 0,
+                "lost": 0,
+                "gf": 0,
+                "ga": 0,
+                "gd": 0,
+                "points": 0
+            }
+
+            teams.append(team)
+
+            print("Team registered successfully!")
+
+    # RECORD MATCH
+
+    elif choice == "2":
+
+        if len(teams) < 2:
+
+            print("Register at least two teams first.")
+
+            continue
+
+        home_name = input("Enter first team: ").strip()
+        away_name = input("Enter second team: ").strip()
+
+        home_team = None
+        away_team = None
+
+        for team in teams:
+
+            if team["name"].lower() == home_name.lower():
+                home_team = team
+
+            if team["name"].lower() == away_name.lower():
+                away_team = team
+
+        if home_team is None or away_team is None:
+
+            print("One or both teams are not registered.")
+
+            continue
+
+        if home_team == away_team:
+
+            print("A team cannot play against itself.")
+
+            continue
+
+        try:
+
+            home_score = int(input("Enter first team score: "))
+            away_score = int(input("Enter second team score: "))
+
+            if home_score < 0 or away_score < 0:
+
+                print("Scores cannot be negative.")
+
+                continue
+
+        except ValueError:
+
+            print("Enter valid numeric scores.")
+
+            continue
+
+        # UPDATE TEAM STATISTICS
+
+        home_team["played"] += 1
+        away_team["played"] += 1
+
+        home_team["gf"] += home_score
+        home_team["ga"] += away_score
+
+        away_team["gf"] += away_score
+        away_team["ga"] += home_score
+
+        home_team["gd"] = (
+            home_team["gf"] - home_team["ga"]
+        )
+
+        away_team["gd"] = (
+            away_team["gf"] - away_team["ga"]
+        )
+
+        # CALCULATE POINTS
+
+        if home_score > away_score:
+
+            home_team["won"] += 1
+            away_team["lost"] += 1
+
+            home_team["points"] += 3
+
+            result = home_name + " won"
+
+        elif away_score > home_score:
+
+            away_team["won"] += 1
+            home_team["lost"] += 1
+
+            away_team["points"] += 3
+
+            result = away_name + " won"
+
+        else:
+
+            home_team["drawn"] += 1
+            away_team["drawn"] += 1
+
+            home_team["points"] += 1
+            away_team["points"] += 1
+
+            result = "Match Draw"
+
+        matches.append({
+            "home": home_name,
+            "away": away_name,
+            "home_score": home_score,
+            "away_score": away_score,
+            "result": result
+        })
+
+        print("\nMatch recorded successfully!")
+        print("Result:", result)
+
+    # LEAGUE TABLE
+
+    elif choice == "3":
+
+        if len(teams) == 0:
+
+            print("No teams registered.")
+
+            continue
+
+        ranking = teams[:]
+
+        # BUBBLE SORT ALGORITHM
+
+        for i in range(len(ranking)):
+
+            for j in range(
+                0, len(ranking) - i - 1
+            ):
+
+                first = ranking[j]
+                second = ranking[j + 1]
+
+                swap = False
+
+                if first["points"] < second["points"]:
+
+                    swap = True
+
+                elif first["points"] == second["points"]:
+
+                    if first["gd"] < second["gd"]:
+
+                        swap = True
+
+                    elif first["gd"] == second["gd"]:
+
+                        if first["gf"] < second["gf"]:
+
+                            swap = True
+
+                if swap:
+
+                    ranking[j], ranking[j + 1] = (
+                        ranking[j + 1],
+                        ranking[j]
+                    )
+
+        print("\n========== LEAGUE TABLE ==========")
+
+        print(
+            f"{'TEAM':15} {'P':>3} {'W':>3} "
+            f"{'D':>3} {'L':>3} {'GD':>4} {'PTS':>4}"
+        )
+
+        for team in ranking:
+
+            print(
+                f"{team['name'][:15]:15} "
+                f"{team['played']:>3} "
+                f"{team['won']:>3} "
+                f"{team['drawn']:>3} "
+                f"{team['lost']:>3} "
+                f"{team['gd']:>4} "
+                f"{team['points']:>4}"
+            )
+
+    # SEARCH TEAM
+
+    elif choice == "4":
+
+        search_name = input(
+            "Enter team name to search: "
+        ).strip().lower()
+
+        found = False
+
+        for team in teams:
+
+            if team["name"].lower() == search_name:
+
+                found = True
+
+                print("\n========== TEAM DETAILS ==========")
+
+                for key, value in team.items():
+
+                    print(key.upper(), ":", value)
+
+                break
+
+        if found == False:
+
+            print("Team not found.")
+
+    # MATCH HISTORY
+
+    elif choice == "5":
+
+        if len(matches) == 0:
+
+            print("No matches recorded.")
+
+        else:
+
+            print("\n========== MATCH HISTORY ==========")
+
+            for number, match in enumerate(matches, 1):
+
+                print("\nMatch:", number)
+
+                print(
+                    match["home"],
+                    match["home_score"],
+                    "-",
+                    match["away_score"],
+                    match["away"]
+                )
+
+                print("Result:", match["result"])
+
+    # EXIT
+
+    elif choice == "6":
+
+        print("\nTournament management system closed.")
+
+        break
+
+    else:
+
+        print("Invalid choice! Select 1 to 6.")
